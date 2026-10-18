@@ -39,3 +39,5 @@ metadata={"collection_timestamp_jst":stamp,"race_id":ID,"source":"netkeiba",
 (OUT/"snapshot_audit.json").write_text(json.dumps(metadata,ensure_ascii=False,indent=2),encoding="utf-8")
 if not market or all(not v["counts"] for v in market.values()):
  raise SystemExit("No usable public odds; do not make expected-value claims.")
+
+# Price refresh requested for 2026-10-18 Shuka Sho ahead of 15:40 start.
