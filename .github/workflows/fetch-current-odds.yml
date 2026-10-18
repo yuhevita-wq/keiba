@@ -1,0 +1,46 @@
+name: Capture current Shuka Sho all-pool odds
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fetch-current-odds.yml
+      - scripts/collect_live_all_odds.py
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-odds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Read today's JRA odds from public provider
+        shell: bash
+        run: |
+          mkdir -p results/live_odds
+          python scripts/collect_live_all_odds.py
+      - name: Keep source timestamps and exact source values
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 20261018-akikasho-all-pool-odds
+          retention-days: 7
+          path: results/live_odds/
+          if-no-files-found: warn
+      - name: Save public market snapshot in repository
+        if: always()
+        shell: bash
+        run: |
+          if [ -f results/live_odds/snapshot_audit.json ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add results/live_odds/
+            git commit -m "Archive timestamped Shuka Sho live market snapshot" || true
+            git push || true
+          fi
